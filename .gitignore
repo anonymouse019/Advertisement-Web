@@ -46,3 +46,4 @@ tmp/
 *.key
 *.crt
 *.log
+.vercel
