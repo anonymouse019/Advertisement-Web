@@ -125,7 +125,78 @@ app.post('/api/register', async (req, res) => {
     });
 
     await user.save();
+const generateSubscriptionEmail = (name, email) => `
+  <div style="max-width:600px;margin:20px auto;padding:20px;
+              border-radius:10px;background:#ffffff;
+              font-family:Arial, sans-serif;
+              box-shadow:0 4px 12px rgba(0,0,0,0.1);">
 
+    <div style="background:#facc15;padding:15px 20px;border-radius:8px 8px 0 0;
+                text-align:center;color:#111;font-size:22px;font-weight:bold;">
+      ✨ Thanks for Subscribing to Shine & Sparkle! ✨
+    </div>
+
+    <div style="padding:20px;">
+      <p style="font-size:16px;color:#333;margin:0 0 15px;">
+        Hello <strong>${name || 'Sparkling Friend'}</strong> 👋,
+      </p>
+
+      <p style="font-size:16px;color:#333;margin:0 0 15px;">
+        Thank you for subscribing to our newsletter!
+      </p>
+
+      <p style="font-size:16px;color:#333;margin:0 0 15px;">
+        You’ll now be the first to know about our newest jewelry collections, special offers, and exclusive sparkle tips.
+      </p>
+
+      <p style="font-size:16px;color:#333;margin:0 0 15px;">
+        We’re thrilled to have you with us. ✨
+      </p>
+
+      <hr style="margin:25px 0;border:none;border-top:1px solid #eee;" />
+
+      <p style="font-size:15px;color:#555;line-height:1.6;">
+        If you have any questions or simply want to say hi, just reply to this email — we’d love to hear from you!
+      </p>
+    </div>
+
+    <div style="background:#f9fafb;padding:15px 20px;text-align:center;
+                border-top:1px solid #eee;border-radius:0 0 8px 8px;
+                font-size:12px;color:#666;">
+      This is a thank-you email from <strong>Shine & Sparkle Jewelry</strong>.<br />
+      <em>Stay radiant. Stay elegant. Stay sparkling. ✨</em>
+    </div>
+  </div>
+`;
+app.post('/api/subscribe', async (req, res) => {
+  const { email, name } = req.body;
+
+  if (!email) return res.status(400).json({ msg: 'Email is required' });
+
+  try {
+    // Create transporter
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      }
+    });
+
+    // Compose and send email
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: '✨ Thanks for Subscribing to Shine & Sparkle!',
+      html: generateSubscriptionEmail(name, email)
+    });
+
+    res.status(200).json({ msg: 'Subscription confirmation email sent successfully' });
+  } catch (err) {
+    console.error('❌ Email error:', err.message);
+    res.status(500).json({ msg: 'Error sending subscription email' });
+  }
+});
     // Send verification email
     if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
       const transporter = nodemailer.createTransport({
