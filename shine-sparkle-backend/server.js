@@ -12,9 +12,38 @@ const productRoutes = require('./routes/ProductRoutes');
 
 const app = express();
 
+// ===== Optimized MongoDB Connection =====
+let dbConnection = null;
+
+async function connectDB() {
+  if (dbConnection) return dbConnection;  // Reuse existing connection
+  try {
+    dbConnection = await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/shine-sparkle', {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    });
+    console.log('✅ MongoDB Connected');
+    return dbConnection;
+  } catch (err) {
+    console.error('❌ MongoDB Connection Error:', err.message);
+    throw err;  // Let this propagate for error handling
+  }
+}
+
 // ===== Middleware =====
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'https://shine-sparkle.vercel.app',
+  origin: function(origin, callback) {
+    const allowedOrigins = [
+      'http://localhost:3000',  // For local development
+      process.env.CLIENT_URL || 'https://shine-sparkle.vercel.app',
+      'https://shine-sparkle-gqd6c7tff-katrine-kate-s-projects.vercel.app'  // Your Vercel deployment URL
+    ];
+    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
 app.use(express.json());
@@ -25,37 +54,6 @@ app.use('/api/products', productRoutes);
 // ===== Environment Vars =====
 const JWT_SECRET = process.env.JWT_SECRET || '262ecc52a3a855cde2833a2b011dcf940aa053e17ab6fa707b46e851111aad10';
 
-// ===== MongoDB Connection =====
-if (!mongoose.connection.readyState) {
-  mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/shine-sparkle', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-  })
-    .then(() => console.log('✅ MongoDB Connected'))
-    .catch(err => console.error('❌ MongoDB Connection Error:', err.message));
-}
-
-// ===== Email Transporter =====
-let transporter = null;
-try {
-  if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-    transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-      }
-    });
-
-    transporter.verify((error) => {
-      if (error) console.error('Email transporter error:', error.message);
-      else console.log('📧 Email transporter ready');
-    });
-  }
-} catch (emailError) {
-  console.error('Nodemailer setup error:', emailError.message);
-}
-
 // ===== JWT Auth Middleware =====
 const authMiddleware = (req, res, next) => {
   const authHeader = req.header('Authorization');
@@ -65,7 +63,7 @@ const authMiddleware = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    req.user = decoded; // { id: user._id }
+    req.user = decoded;  // { id: user._id }
     next();
   } catch (err) {
     res.status(401).json({ msg: 'Token is not valid' });
@@ -75,6 +73,7 @@ const authMiddleware = (req, res, next) => {
 // ===== Product Routes (for frontend display) =====
 app.get('/api/products/featured', async (req, res) => {
   try {
+    await connectDB();  // Ensure DB is connected
     const products = await Product.find().limit(6);
     res.json(products);
   } catch (err) {
@@ -84,6 +83,7 @@ app.get('/api/products/featured', async (req, res) => {
 
 app.get('/api/products', async (req, res) => {
   try {
+    await connectDB();  // Ensure DB is connected
     const products = await Product.find();
     res.json(products);
   } catch (err) {
@@ -93,6 +93,7 @@ app.get('/api/products', async (req, res) => {
 
 app.get('/api/products/:id', async (req, res) => {
   try {
+    await connectDB();  // Ensure DB is connected
     const product = await Product.findById(req.params.id);
     if (!product) return res.status(404).json({ message: 'Product not found' });
     res.json(product);
@@ -110,6 +111,7 @@ app.post('/api/register', async (req, res) => {
       return res.status(400).json({ msg: 'Please fill all fields' });
     }
 
+    await connectDB();  // Ensure DB is connected
     const existingUser = await User.findOne({ email });
     if (existingUser) return res.status(400).json({ msg: 'User already exists' });
 
@@ -124,7 +126,15 @@ app.post('/api/register', async (req, res) => {
     await user.save();
 
     // Send verification email
-    if (transporter) {
+    if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS
+        }
+      });
+
       const verificationUrl = `${process.env.CLIENT_URL || 'https://shine-sparkle.vercel.app'}/verify/${user._id}`;
       const mailOptions = {
         from: process.env.EMAIL_USER,
@@ -154,6 +164,7 @@ app.post('/api/login', async (req, res) => {
     if (!email || !password)
       return res.status(400).json({ msg: 'Please fill all fields' });
 
+    await connectDB();  // Ensure DB is connected
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ msg: 'Invalid credentials' });
     if (!user.isVerified) return res.status(400).json({ msg: 'Please verify your email first' });
@@ -178,6 +189,7 @@ app.put('/api/verify/:id', async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(id))
       return res.status(400).json({ msg: 'Invalid verification link' });
 
+    await connectDB();  // Ensure DB is connected
     const user = await User.findByIdAndUpdate(id, { isVerified: true }, { new: true });
     if (!user) return res.status(404).json({ msg: 'User not found' });
 
@@ -193,6 +205,12 @@ app.use('/api/cart', (req, res) => {
     redirect: '/contact',
     msg: '🛍️ Cart feature disabled. Please reach out via the Contact page.'
   });
+});
+
+// ===== Global Error Handler =====
+app.use((err, req, res, next) => {
+  console.error(err.stack);  // Log the error for debugging
+  res.status(500).json({ msg: 'Server error', error: err.message });
 });
 
 // ===== Export app for Vercel =====
