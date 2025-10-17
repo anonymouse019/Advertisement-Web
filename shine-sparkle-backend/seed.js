@@ -22,7 +22,7 @@ const products = [
     description: 'Timeless diamond necklace for everyday elegance.',
     price: 299.99,
     category: 'Necklace',
-    image: 'https://images.unsplash.com/photo-1512968558200-3d7c5d5b3f0d?w=400&fit=crop',
+    image: 'https://cdn.shopify.com/s/files/1/0364/7253/products/Web_IMG_4334-Edit_706x918_crop_center.jpg?v=1665499242',
     stock: 15,
     featured: true
   },
@@ -31,7 +31,7 @@ const products = [
     description: 'Classic gold hoops with subtle sparkle.',
     price: 149.50,
     category: 'Earrings',
-    image: 'https://images.unsplash.com/photo-1573957035912-3e0c16e0a4e4?w=400&fit=crop',
+    image: 'https://i.pinimg.com/originals/a4/53/f4/a453f4a4d373f2c4d83d9124db904512.jpg',
     stock: 20,
     featured: true
   },
@@ -40,7 +40,7 @@ const products = [
     description: 'Vibrant ruby ring symbolizing passion and luxury.',
     price: 450.00,
     category: 'Ring',
-    image: 'https://images.unsplash.com/photo-1556228574-6b8e9b0a8a0e?w=400&fit=crop',
+    image: 'https://a.1stdibscdn.com/82-carat-natural-vivid-bright-ruby-solitaire-ring-and-band-14-karat-for-sale-picture-3/j_11863/1537999749459/2284_6_master.JPG?width=768',
     stock: 8,
     featured: true
   },
@@ -49,7 +49,7 @@ const products = [
     description: 'Elegant pearl bracelet for sophisticated wrists.',
     price: 220.75,
     category: 'Bracelet',
-    image: 'https://images.unsplash.com/photo-1608043152269-423dbba4e7e4?w=400&fit=crop',
+    image: 'https://static.helloice.com/productimages/2024/6/HLB10048/1797485039110459392.jpeg',
     stock: 12,
     featured: true
   },
@@ -58,7 +58,7 @@ const products = [
     description: 'Deep blue sapphire pendant on gold chain.',
     price: 380.00,
     category: 'Pendant',
-    image: 'https://images.unsplash.com/photo-1608043152269-423dbba4e7e4?w=400&fit=crop',
+    image: 'https://a.1stdibscdn.com/angara-gia-certified-natural-sapphire-yellow-gold-pendant-necklace-for-sale/22569652/j_178830521670504782464/j_17883052_1670504782793_bg_processed.jpg',
     stock: 10,
     featured: true
   },
@@ -67,7 +67,7 @@ const products = [
     description: 'Luxurious emerald studs for a pop of green.',
     price: 280.25,
     category: 'Earrings',
-    image: 'https://images.unsplash.com/photo-1608043152269-423dbba4e7e4?w=400&fit=crop',
+    image: 'https://i.etsystatic.com/23490555/r/il/c71f7f/2886094284/il_fullxfull.2886094284_pvmy.jpg',
     stock: 18,
     featured: false
   },
@@ -78,7 +78,7 @@ const products = [
     category: 'Bracelet',
     stock: 25,
     featured: false,
-    image: 'https://images.unsplash.com/photo-1608043152269-423dbba4e7e4?w=400&fit=crop'
+    image: 'https://m.media-amazon.com/images/S/aplus-media-library-service-media/fe3c1bea-d810-4949-a270-6d44d00c5fd0.__CR0,1379,4672,1915_PT0_SX1464_V1___.jpg'
   }
   // Add more products here if needed (e.g., for Shop page variety)
 ];

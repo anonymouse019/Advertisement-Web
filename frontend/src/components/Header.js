@@ -1,67 +1,81 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FaShoppingCart, FaUser  } from 'react-icons/fa';  // Fixed spacing
+import { FaShoppingCart } from 'react-icons/fa';
+import { useAuth } from '../Context/AuthContext';
 
-const Header = ({ user, cart, logout }) => {
-  // Total cart quantity (your logic—correct!)
-  const totalQuantity = cart.reduce((sum, item) => sum + item.quantity, 0);
+const Header = () => {
+  const { user, cart, logout, loading } = useAuth();
+
+  // Total quantity of items in cart
+  const totalQuantity = cart ? cart.reduce((sum, item) => sum + (item.quantity || 0), 0) : 0;
+
+  if (loading) {
+    return (
+      <header className="bg-[#0b1733] shadow-md py-4 sticky top-0 z-50">
+        <div className="container mx-auto px-6 flex justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#d4af37]"></div>
+        </div>
+      </header>
+    );
+  }
 
   return (
-    <header className="bg-white shadow-md py-4">
-      <div className="container mx-auto flex justify-between items-center px-4">
-        {/* Logo */}
-        <Link to="/" className="text-3xl font-bold text-gold elegant">
+    <header className="bg-[#0b1733] shadow-md py-4 sticky top-0 z-50">
+      <div className="container mx-auto flex justify-between items-center px-6">
+        <Link
+          to="/"
+          className="text-2xl md:text-3xl font-bold text-[#d4af37]"
+          style={{ fontFamily: "'Playfair Display', serif" }}
+        >
           Shine & Sparkle
         </Link>
 
-        {/* Desktop Nav */}
-        <nav className="hidden md:flex space-x-8">
-          <Link to="/" className="text-gray-700 hover:text-gold transition">Home</Link>
-          <Link to="/shop" className="text-gray-700 hover:text-gold transition">Shop</Link>
-          <Link to="/community" className="text-gray-700 hover:text-gold transition">Community</Link>
-          <Link to="/about" className="text-gray-700 hover:text-gold transition">About</Link>
-          <Link to="/contact" className="text-gray-700 hover:text-gold transition">Contact</Link>
+        <nav className="hidden md:flex space-x-8 text-white uppercase text-sm font-semibold tracking-wide">
+          <Link to="/" className="hover:text-[#d4af37] transition">Home</Link>
+          <Link to="/shop" className="hover:text-[#d4af37] transition">Shop</Link>
+          <Link to="/collections" className="hover:text-[#d4af37] transition">Collections</Link>
+          <Link to="/about" className="hover:text-[#d4af37] transition">About</Link>
+          <Link to="/contact" className="hover:text-[#d4af37] transition">Contact</Link>
+          {/* <Link to="/cart" className="hover:text-[#d4af37] transition">
+            Cart ({totalQuantity})
+          </Link> */}
         </nav>
 
-        {/* Right Side: Cart + Auth */}
-        <div className="flex items-center space-x-4 flex-wrap">
-          {/* Cart Icon with Badge */}
-          <Link to="/cart" className="relative">
-            <FaShoppingCart size={24} className="text-gold" />
+        <div className="flex items-center space-x-4">
+          {/* <Link to="/cart" className="relative">
+            <FaShoppingCart size={22} className="text-[#d4af37]" />
             {totalQuantity > 0 && (
-              <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full px-2 py-1 text-xs min-w-[20px] flex items-center justify-center">
+              <span className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full px-1 text-xs flex items-center justify-center min-w-[1rem] h-[1rem]">
                 {totalQuantity}
               </span>
             )}
-          </Link>
+          </Link> */}
 
-          {/* User Auth: Single Conditional (Logged In vs Guest) */}
           {user ? (
-            <div className="flex items-center space-x-2 md:space-x-4">
-              <Link to="/profile" title="Profile">
-                <FaUser  size={20} className="text-gold hover:text-gold-dark" />
-              </Link>
-              <span className="hidden sm:inline text-sm text-gray-700">Hi, {user.name}!</span>
+            <div className="flex items-center space-x-3">
+              <span className="text-[#d4af37] font-semibold">
+                Hi, {user.name || user.fullname || user.email || 'User'}
+              </span>
               <button
                 onClick={logout}
-                className="bg-gold text-white px-3 py-1 md:px-4 md:py-2 rounded text-sm font-medium hover:bg-gold-dark transition"
+                className="bg-[#d4af37] text-[#0b1733] px-4 py-2 rounded font-semibold hover:bg-[#c29e30] transition"
               >
                 Logout
               </button>
             </div>
           ) : (
-            <div className="flex space-x-2 md:space-x-4">
-              <Link
-                to="/login"
-                className="bg-gold text-white px-3 py-1 md:px-4 md:py-2 rounded text-sm font-medium hover:bg-gold-dark transition"
-              >
-                Login
-              </Link>
+            <div className="flex space-x-2">
               <Link
                 to="/register"
-                className="bg-transparent border-2 border-gold text-gold px-3 py-1 md:px-4 md:py-2 rounded text-sm font-medium hover:bg-gold hover:text-white transition"
+                className="bg-transparent border border-[#d4af37] text-[#d4af37] px-4 py-2 rounded font-semibold hover:bg-[#d4af37] hover:text-[#0b1733] transition"
               >
                 Register
+              </Link>
+              <Link
+                to="/login"
+                className="bg-[#d4af37] text-[#0b1733] px-4 py-2 rounded font-semibold hover:bg-[#c29e30] transition"
+              >
+                Login
               </Link>
             </div>
           )}
