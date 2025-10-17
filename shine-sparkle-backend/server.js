@@ -29,6 +29,29 @@ async function connectDB() {
     throw err;  // Let this propagate for error handling
   }
 }
+// ===== Email Transporter =====
+let transporter;
+try {
+  transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS
+    }
+  });
+
+  transporter.verify((error, success) => {
+    if (error) {
+      console.error('Email transporter error on startup:', error.message);
+    } else {
+      console.log('Email transporter ready - Gmail connected');
+    }
+  });
+} catch (emailError) {
+  console.error('Nodemailer setup error:', emailError.message);
+  console.log('Emails disabled - continuing without Nodemailer');
+  transporter = null;
+} 
 
 // ===== Middleware =====
 app.use(cors({
