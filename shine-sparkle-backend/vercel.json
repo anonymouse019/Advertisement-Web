@@ -1,23 +1,30 @@
 {
+  "version": 2,
   "builds": [
+
     {
       "src": "frontend/package.json",
       "use": "@vercel/static-build",
-      "config": { "distDir": "build" }
+      "config": {
+        "outputDirectory": "build"
+      }
     },
+
     {
       "src": "shine-sparkle-backend/server.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
+
     {
       "src": "/api/(.*)",
       "dest": "shine-sparkle-backend/server.js"
     },
+  
     {
       "src": "/(.*)",
-      "dest": "/index.html"
+      "dest": "frontend/build/index.html"
     }
   ]
 }
